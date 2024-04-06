@@ -16,72 +16,144 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  late VideoPlayerController _videoPlayerController;
+  late VideoPlayerController _controller;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
-    _videoPlayerController =
+    _controller =
         VideoPlayerController.networkUrl(Uri.parse(_src[_selectedVideo]));
-    _videoPlayerController.initialize().then((value) => setState(() {}));
-    _videoPlayerController.play();
+    _controller.initialize().then((value) => setState(() {}));
+    _controller.play();
   }
 
+  bool isControllerVisie = true;
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Center(
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Positioned(
-                  child: AspectRatio(
-                aspectRatio: _videoPlayerController.value.aspectRatio,
-                child: VideoPlayer(_videoPlayerController),
-              )),
-              Positioned.fill(
-                child: Container(
-                  alignment: Alignment.bottomCenter,
-                  height: 50,
-                  color: Colors.amber,
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          IconButton(
-                              onPressed: () async {
-                                final position =
-                                    await _videoPlayerController.position;
-                                final targetPosition =
-                                    position!.inMilliseconds - 1000;
-                                await _videoPlayerController.seekTo(
-                                    Duration(milliseconds: targetPosition));
-                              },
-                              icon: const Icon(Icons.fast_rewind_rounded)),
-                          IconButton(
-                              onPressed: () async {
-                                final position =
-                                    await _videoPlayerController.position;
-                                final targetPosition =
-                                    position!.inMilliseconds + 1000;
-                                await _videoPlayerController.seekTo(
-                                    Duration(milliseconds: targetPosition));
-                              },
-                              icon: const Icon(Icons.fast_forward_rounded)),
-                        ],
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                isControllerVisie = !isControllerVisie;
+              });
+            },
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Positioned(
+                    child: AspectRatio(
+                  aspectRatio: _controller.value.aspectRatio,
+                  child: VideoPlayer(_controller),
+                )),
+                isControllerVisie
+                    ? Positioned.fill(
+                      bottom:0,
+                        child: Container(
+                          alignment: Alignment.bottomCenter,
+                          height: 50,
+                           child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  //rewind
+                                  IconButton(
+                                      onPressed: () async {
+                                        final position =
+                                            await _controller.position;
+                                        final targetPosition =
+                                            position!.inMilliseconds - 1000;
+                                        await _controller.seekTo(Duration(
+                                            milliseconds: targetPosition));
+                                      },
+                                      icon: const Icon(
+                                          Icons.fast_rewind_rounded)),
+                                  //previous
+                                  IconButton(
+                                      onPressed: () {
+                                        _selectedVideo--;
+                                        _selectedVideo %= _src.length;
+                                        onChangeVideo();
+                                      },
+                                      icon: const Icon(
+                                          Icons.skip_previous_rounded)),
+                                  //play or pause
+                                  IconButton(
+                                      onPressed: () async {
+                                        _controller.value.isPlaying
+                                            ? await _controller.pause()
+                                            : await _controller.play();
+
+                                        setState(() {});
+                                      },
+                                      icon: Icon(_controller.value.isPlaying
+                                          ? Icons.pause_circle_filled_rounded
+                                          : Icons.play_circle_filled_rounded)),
+                                  //next
+                                  IconButton(
+                                      onPressed: () {
+                                        _selectedVideo++;
+                                        _selectedVideo %= _src.length;
+                                        onChangeVideo();
+                                      },
+                                      icon:
+                                          const Icon(Icons.skip_next_rounded)),
+                                  //forward
+                                  IconButton(
+                                      onPressed: () async {
+                                        final position =
+                                            await _controller.position;
+                                        final targetPosition =
+                                            position!.inMilliseconds + 1000;
+                                        await _controller.seekTo(Duration(
+                                            milliseconds: targetPosition));
+                                      },
+                                      icon: const Icon(
+                                          Icons.fast_forward_rounded)),
+                                ],
+                              ),
+                              VideoProgressIndicator(
+                                _controller,
+                                allowScrubbing: true,
+                                colors: const VideoProgressColors(
+                                  playedColor: Colors.white,
+                                  backgroundColor: Colors.black45,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
                       )
-                    ],
-                  ),
-                ),
-              )
-            ],
+                    : const SizedBox.shrink()
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  onChangeVideo() {
+    _controller.dispose();
+    _controller =
+        VideoPlayerController.networkUrl(Uri.parse(_src[_selectedVideo]));
+
+    _controller.addListener(() {
+      setState(() {
+        if (!_controller.value.isPlaying &&
+            _controller.value.isInitialized &&
+            (_controller.value.duration == _controller.value.position)) {
+          _controller.seekTo(Duration.zero);
+        }
+      });
+    });
+    _controller.initialize().then((value) => setState(() {
+          _controller.play();
+        }));
   }
 }
