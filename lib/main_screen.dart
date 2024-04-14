@@ -51,83 +51,81 @@ class _MainScreenState extends State<MainScreen> {
                   child: VideoPlayer(_controller),
                 )),
                 isControllerVisie
-                    ? Positioned.fill(
-                      bottom:0,
-                        child: Container(
-                          alignment: Alignment.bottomCenter,
-                          height: 50,
-                           child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  //rewind
-                                  IconButton(
-                                      onPressed: () async {
-                                        final position =
-                                            await _controller.position;
-                                        final targetPosition =
-                                            position!.inMilliseconds - 1000;
-                                        await _controller.seekTo(Duration(
-                                            milliseconds: targetPosition));
-                                      },
-                                      icon: const Icon(
-                                          Icons.fast_rewind_rounded)),
-                                  //previous
-                                  IconButton(
-                                      onPressed: () {
-                                        _selectedVideo--;
-                                        _selectedVideo %= _src.length;
-                                        onChangeVideo();
-                                      },
-                                      icon: const Icon(
-                                          Icons.skip_previous_rounded)),
-                                  //play or pause
-                                  IconButton(
-                                      onPressed: () async {
-                                        _controller.value.isPlaying
-                                            ? await _controller.pause()
-                                            : await _controller.play();
-
-                                        setState(() {});
-                                      },
-                                      icon: Icon(_controller.value.isPlaying
-                                          ? Icons.pause_circle_filled_rounded
-                                          : Icons.play_circle_filled_rounded)),
-                                  //next
-                                  IconButton(
-                                      onPressed: () {
-                                        _selectedVideo++;
-                                        _selectedVideo %= _src.length;
-                                        onChangeVideo();
-                                      },
-                                      icon:
-                                          const Icon(Icons.skip_next_rounded)),
-                                  //forward
-                                  IconButton(
-                                      onPressed: () async {
-                                        final position =
-                                            await _controller.position;
-                                        final targetPosition =
-                                            position!.inMilliseconds + 1000;
-                                        await _controller.seekTo(Duration(
-                                            milliseconds: targetPosition));
-                                      },
-                                      icon: const Icon(
-                                          Icons.fast_forward_rounded)),
-                                ],
-                              ),
-                              VideoProgressIndicator(
-                                _controller,
-                                allowScrubbing: true,
-                                colors: const VideoProgressColors(
-                                  playedColor: Colors.white,
-                                  backgroundColor: Colors.black45,
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
+                    ? Positioned(
+                      bottom:8,
+                      right:0,
+                      left:0,
+                        child: Column(
+                         children: [
+                           Row(
+                             mainAxisAlignment: MainAxisAlignment.center,
+                             children: [
+                               //rewind
+                               IconButton(
+                                   onPressed: () async {
+                                     final position =
+                                         await _controller.position;
+                                     final targetPosition =
+                                         position!.inMilliseconds - 1000;
+                                     await _controller.seekTo(Duration(
+                                         milliseconds: targetPosition));
+                                   },
+                                   icon: const Icon(
+                                       Icons.fast_rewind_rounded)),
+                               //previous
+                               IconButton(
+                                   onPressed: () {
+                                     _selectedVideo--;
+                                     _selectedVideo %= _src.length;
+                                     onChangeVideo();
+                                   },
+                                   icon: const Icon(
+                                       Icons.skip_previous_rounded)),
+                               //play or pause
+                               IconButton(
+                                   onPressed: () async {
+                                     _controller.value.isPlaying
+                                         ? await _controller.pause()
+                                         : await _controller.play();
+                        
+                                     setState(() {});
+                                   },
+                                   icon: Icon(_controller.value.isPlaying
+                                       ? Icons.pause_circle_filled_rounded
+                                       : Icons.play_circle_filled_rounded)),
+                               //next
+                               IconButton(
+                                   onPressed: () {
+                                     _selectedVideo++;
+                                     _selectedVideo %= _src.length;
+                                     onChangeVideo();
+                                   },
+                                   icon:
+                                       const Icon(Icons.skip_next_rounded)),
+                               //forward
+                               IconButton(
+                                   onPressed: () async {
+                                     final position =
+                                         await _controller.position;
+                                     final targetPosition =
+                                         position!.inMilliseconds + 1000;
+                                     await _controller.seekTo(Duration(
+                                         milliseconds: targetPosition));
+                                   },
+                                   icon: const Icon(
+                                       Icons.fast_forward_rounded)),
+                             ],
+                           ),
+                           VideoProgressIndicator(
+                             _controller,
+                             allowScrubbing: true,
+                             colors: const VideoProgressColors(
+                               playedColor: Colors.red,
+                               backgroundColor: Colors.black45,
+                             ),
+                           )
+                         ],
+                                                  ),
                       )
                     : const SizedBox.shrink()
               ],
